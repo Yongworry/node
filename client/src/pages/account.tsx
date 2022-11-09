@@ -42,7 +42,7 @@ const AccountPage = () => {
       <h2>Account</h2>
       <div className={"account-token-input"}>
         Enter Name: <input type={"text"} value={SName} onChange={e => setSName(e.target.value)}/><br/>
-        Enter Name: <input type={"text"} value={SPassword} onChange={e => setSPassword(e.target.value)}/>
+        Enter Password: <input type={"text"} value={SPassword} onChange={e => setSPassword(e.target.value)}/>
         <button onClick={e => getAccountInformation()}>GET</button>
       </div>
       <div className={"account-bank"}>
