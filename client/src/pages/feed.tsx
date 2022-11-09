@@ -9,11 +9,14 @@ interface IAPIResponse  { id: number, title: string, content: string }
 const FeedPage = (props: {}) => {
   const [ LAPIResponse, setLAPIResponse ] = React.useState<IAPIResponse[]>([]);
   const [ NPostCount, setNPostCount ] = React.useState<number>(0);
+  const [ SPostID, setSPostID ] = React.useState<string>("");
   const [ SNewPostTitle, setSNewPostTitle ] = React.useState<string>("");
   const [ SNewPostContent, setSNewPostContent ] = React.useState<string>("");
+  const [ edited, setEdited ] = React.useState<boolean>(false);
 
   React.useEffect( () => {
     let BComponentExited = false;
+    if (edited) setEdited(false);
     const asyncFun = async () => {
       const { data } = await axios.get<IAPIResponse[]>( SAPIBase + `/feed/getFeed?count=${ NPostCount }`);
       console.log(data);
@@ -23,12 +26,23 @@ const FeedPage = (props: {}) => {
     };
     asyncFun().catch((e) => window.alert(`Error while running API Call: ${e}`));
     return () => { BComponentExited = true; }
-  }, [ NPostCount ]);
+  }, [ NPostCount, edited ]);
 
   const createNewPost = () => {
     const asyncFun = async () => {
       await axios.post( SAPIBase + '/feed/addFeed', { title: SNewPostTitle, content: SNewPostContent } );
       setNPostCount(NPostCount + 1);
+      setSNewPostTitle("");
+      setSNewPostContent("");
+    }
+    asyncFun().catch(e => window.alert(`AN ERROR OCCURED! ${e}`));
+  }
+
+  const editPost = () => {
+    const asyncFun = async () => {
+      await axios.post( SAPIBase + '/feed/editFeed', { id: SPostID, title: SNewPostTitle, content: SNewPostContent } );
+      setEdited(true);
+      setSPostID("");
       setSNewPostTitle("");
       setSNewPostContent("");
     }
@@ -58,15 +72,19 @@ const FeedPage = (props: {}) => {
         { LAPIResponse.map( (val, i) =>
           <div key={i} className={"feed-item"}>
             <div className={"delete-item"} onClick={(e) => deletePost(`${val.id}`)}>ⓧ</div>
+            <p className={"feed-id"}>{ val.id }</p>
             <h3 className={"feed-title"}>{ val.title }</h3>
             <p className={"feed-body"}>{ val.content }</p>
           </div>
         ) }
         <div className={"feed-item-add"}>
+          ID: <input type={"text"} value={SPostID} onChange={(e) => setSPostID(e.target.value)}/>
+          &nbsp;&nbsp;&nbsp;&nbsp;
           Title: <input type={"text"} value={SNewPostTitle} onChange={(e) => setSNewPostTitle(e.target.value)}/>
           &nbsp;&nbsp;&nbsp;&nbsp;
           Content: <input type={"text"} value={SNewPostContent} onChange={(e) => setSNewPostContent(e.target.value)}/>
           <div className={"post-add-button"} onClick={(e) => createNewPost()}>Add Post!</div>
+          <div className={"post-edit-button"} onClick={(e) => editPost()}>Edit Post!</div>
         </div>
       </div>
     </div>
