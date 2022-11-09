@@ -14,9 +14,11 @@ class FeedDB {
     constructor() { console.log("[Feed-DB] DB Init Completed"); }
 
     selectItems = ( count ) => {
+        /*
         if (count > this.#itemCount) return { success: false, data: "Too many items queried"  };
         if (count < 0) return { success: false, data: "Invalid count provided" };
-        else return { success: true, data: this.#LDataDB.slice(0, count) }
+        */
+        return { success: true, data: this.#LDataDB.slice(0, count) }
     }
 
     insertItem = ( item ) => {
@@ -24,6 +26,18 @@ class FeedDB {
         this.#LDataDB.push({ id: this.#id, title, content });
         this.#id++; this.#itemCount++;
         return true;
+    }
+
+    editItem = ( id, item ) => {
+        let edited = false;
+        const { title, content } = item;
+        this.#LDataDB = this.#LDataDB.map((e) => {
+            if (e.id === id){
+                edited = true;
+                return {id: id, title:title, content:content};
+            } else return e;
+        });
+        return edited;
     }
 
     deleteItem = ( id ) => {
@@ -61,6 +75,19 @@ router.post('/addFeed', (req, res) => {
        return res.status(500).json({ error: e });
    }
 });
+
+router.post('/editFeed', (req, res) => {
+    try {
+        console.log("come into")
+        const { id, title, content } = req.body;
+        const editResult = feedDBInst.editItem(parseInt(id), { title, content });
+        if (!editResult) return res.status(500).json({ error: dbRes.data })
+        else return res.status(200).json({ isOK: true });
+    } catch (e) {
+        return res.status(500).json({ error: e });
+    }
+ });
+
 
 router.post('/deleteFeed', (req, res) => {
     try {
