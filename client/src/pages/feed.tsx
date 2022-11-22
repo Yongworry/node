@@ -4,7 +4,7 @@ import { SAPIBase } from "../tools/api";
 import Header from "../components/header";
 import "./css/feed.css";
 
-interface IAPIResponse  { id: number, title: string, content: string }
+interface IAPIResponse  { _id: string, id: number, title: string, content: string }
 
 const FeedPage = (props: {}) => {
   const [ LAPIResponse, setLAPIResponse ] = React.useState<IAPIResponse[]>([]);
@@ -30,8 +30,9 @@ const FeedPage = (props: {}) => {
 
   const createNewPost = () => {
     const asyncFun = async () => {
-      await axios.post( SAPIBase + '/feed/addFeed', { title: SNewPostTitle, content: SNewPostContent } );
+      await axios.post( SAPIBase + '/feed/addFeed', { id: SPostID, title: SNewPostTitle, content: SNewPostContent } );
       setNPostCount(NPostCount + 1);
+      setSPostID("");
       setSNewPostTitle("");
       setSNewPostContent("");
     }
@@ -49,10 +50,11 @@ const FeedPage = (props: {}) => {
     asyncFun().catch(e => window.alert(`AN ERROR OCCURED! ${e}`));
   }
 
-  const deletePost = (id: string) => {
+  const deletePost = (_id: string) => {
     const asyncFun = async () => {
       // One can set X-HTTP-Method header to DELETE to specify deletion as well
-      await axios.post( SAPIBase + '/feed/deleteFeed', { id: id } );
+      await axios.post( SAPIBase + '/feed/deleteFeed', { _id: _id } );
+      console.log("done");
       setNPostCount(Math.max(NPostCount - 1, 0));
     }
     asyncFun().catch(e => window.alert(`AN ERROR OCCURED! ${e}`));
@@ -71,7 +73,7 @@ const FeedPage = (props: {}) => {
       <div className={"feed-list"}>
         { LAPIResponse.map( (val, i) =>
           <div key={i} className={"feed-item"}>
-            <div className={"delete-item"} onClick={(e) => deletePost(`${val.id}`)}>ⓧ</div>
+            <div className={"delete-item"} onClick={(e) => deletePost(`${val._id}`)}>ⓧ</div>
             <p className={"feed-id"}>{ val.id }</p>
             <h3 className={"feed-title"}>{ val.title }</h3>
             <p className={"feed-body"}>{ val.content }</p>
